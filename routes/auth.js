@@ -5,6 +5,8 @@ import users from "../database.js";
 import bcrypt from "bcrypt";
 import JWT from "jsonwebtoken";
 
+const secret = "HWQXTVdJWQ3SDJ6Lkb45XFGAWpAu4vPk";
+
 const validations = [
   check("email", "Please enter a valid email address").isEmail(),
   check("password", "Password must be more than 4 characters").isLength({
@@ -27,7 +29,7 @@ const emailExists = (email, res) => {
     return res.status(400).json({
       errors: [
         {
-          msg: "Invalid credentials",
+          msg: "Email already exists",
         },
       ],
     });
@@ -49,10 +51,41 @@ router.post("/signup", validations, async (req, res) => {
       password: hashedPassword,
     });
 
-    const secret = "HWQXTVdJWQ3SDJ6Lkb45XFGAWpAu4vPk";
     const token = await JWT.sign({ email }, secret, { expiresIn: "1d" });
 
-    res.json({
+    return res.json({
+      token,
+    });
+  }
+});
+
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = users.find((user) => user.email === email);
+  if (!user) {
+    return res.status(400).json({
+      errors: [
+        {
+          msg: "Invalid credentials",
+        },
+      ],
+    });
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    return res.status(400).json({
+      errors: [
+        {
+          msg: "Invalid credentials",
+        },
+      ],
+    });
+  } else {
+    const token = await JWT.sign({ email }, secret, { expiresIn: "1d" });
+
+    return res.json({
       token,
     });
   }
