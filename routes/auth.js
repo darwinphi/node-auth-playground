@@ -3,6 +3,7 @@ const router = express.Router();
 import { check, validationResult } from "express-validator";
 import users from "../database.js";
 import bcrypt from "bcrypt";
+import JWT from "jsonwebtoken";
 
 const validations = [
   check("email", "Please enter a valid email address").isEmail(),
@@ -47,9 +48,12 @@ router.post("/signup", validations, async (req, res) => {
       email,
       password: hashedPassword,
     });
+
+    const secret = "HWQXTVdJWQ3SDJ6Lkb45XFGAWpAu4vPk";
+    const token = await JWT.sign({ email }, secret, { expiresIn: "1d" });
+
     res.json({
-      email,
-      hashedPassword,
+      token,
     });
   }
 });
