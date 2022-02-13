@@ -1,7 +1,7 @@
 import express from "express";
 const router = express.Router();
 import { check, validationResult } from "express-validator";
-import users from "../database.js";
+import { users } from "../database.js";
 import bcrypt from "bcrypt";
 import JWT from "jsonwebtoken";
 

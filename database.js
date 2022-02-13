@@ -5,4 +5,11 @@ let users = [
   },
 ];
 
-export default users;
+let profile = [
+  {
+    title: "Hello, Earth",
+    body: "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+  },
+];
+
+export { users, profile };
