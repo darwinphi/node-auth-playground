@@ -2,6 +2,7 @@ import express from "express";
 const router = express.Router();
 import { check, validationResult } from "express-validator";
 import users from "../database.js";
+import bcrypt from "bcrypt";
 
 const validations = [
   check("email", "Please enter a valid email address").isEmail(),
@@ -22,26 +23,39 @@ const checkValidations = (req, res) => {
 const emailExists = (email, res) => {
   const user = users.find((user) => user.email === email);
   if (user) {
-    res.status(400).json({
+    return res.status(400).json({
       errors: [
         {
           msg: "Invalid credentials",
         },
       ],
     });
+  } else {
+    return false;
   }
 };
 
-router.post("/signup", validations, (req, res) => {
+router.post("/signup", validations, async (req, res) => {
   const { email, password } = req.body;
 
   checkValidations(req, res);
-  emailExists(email, res);
 
-  res.json({
-    email,
-    password,
-  });
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  if (!emailExists(email, res)) {
+    users.push({
+      email,
+      password: hashedPassword,
+    });
+    res.json({
+      email,
+      hashedPassword,
+    });
+  }
+});
+
+router.get("/users", (req, res) => {
+  res.json(users);
 });
 
 export default router;
